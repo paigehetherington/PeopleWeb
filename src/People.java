@@ -46,7 +46,7 @@ public class People {
                     m.put("showPrevious", showPrevious);
 
                     boolean showNext = false;
-                    if (offsetNum < 980) {
+                    if (offsetNum < people.size() - 20) {
                         showNext = true;
                     }
                     m.put("showNext", showNext);
