@@ -36,11 +36,11 @@ public class People {
                     }
 
 
-                    ArrayList<Person> firstPeople = new ArrayList<>(people.subList(offsetNum, 20 + offsetNum));
-
+                    ArrayList<Person> twentyPeople = new ArrayList<>(people.subList(offsetNum, Math.min(20, (people.size() - offsetNum)) + offsetNum));
+                        //math.min for either 20 or remainder over 1000 if not equal to 20
                     HashMap m = new HashMap();
-                    m.put("people", firstPeople);
-                    m.put("number", offsetNum + 20);
+                    m.put("people", twentyPeople);
+                    m.put("next", offsetNum + 20);
                     m.put("previous", offsetNum - 20);
                     boolean showPrevious = false;
                     if (offsetNum >= 20) {
@@ -84,5 +84,5 @@ public class People {
         }
 
     }
-}//end class
+}
 
