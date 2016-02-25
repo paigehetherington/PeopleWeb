@@ -21,8 +21,11 @@ public class People {
 
         // ArrayList<Person> firstPeople = new ArrayList<>();
 
+        //Spark.externalStaticFileLocation("public");
+        Spark.staticFileLocation("public");
 
         Spark.init();
+
         Spark.get(
                 "/",
                 ((request, response) -> {
