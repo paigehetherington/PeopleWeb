@@ -14,6 +14,8 @@ import java.util.Scanner;
  */
 public class People {
 
+    //public static final int COUNT = 20;
+
     public static void createTables(Connection conn) throws SQLException {
         Statement stmt = conn.createStatement();
         stmt.execute("DROP TABLE IF EXISTS people");
@@ -61,9 +63,10 @@ public class People {
         }
     }
 
-    public static ArrayList<Person> selectPeople(Connection conn) throws SQLException {
+    public static ArrayList<Person> selectPeople(Connection conn, int offset) throws SQLException {
         ArrayList<Person> persons = new ArrayList<>();
-        PreparedStatement stmt = conn.prepareStatement("SELECT * FROM people");
+        PreparedStatement stmt = conn.prepareStatement("SELECT * FROM people LIMIT 20 OFFSET ?");
+        stmt.setInt(1, offset);
         ResultSet results = stmt.executeQuery();
         while (results.next()) {
             int id = results.getInt("id");
@@ -78,14 +81,22 @@ public class People {
         return persons;
     }
 
+    public static int getSize(Connection conn) throws SQLException {
+        PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(id) AS size FROM people");
+        ResultSet results = stmt.executeQuery();
+        results.next();
+        return results.getInt("size");
+
+    }
+
     public static void main(String[] args) throws FileNotFoundException, SQLException {
 
         Connection conn = DriverManager.getConnection("jdbc:h2:./main");
         createTables(conn);
 
 
-        ArrayList<Person> people = new ArrayList<>();
-        readFile(people);
+        //ArrayList<Person> people = new ArrayList<>();
+        populateDatabase(conn); //readFile(people);
 
         // ArrayList<Person> firstPeople = new ArrayList<>();
 
@@ -104,20 +115,23 @@ public class People {
                     }
 
 
-                    ArrayList<Person> twentyPeople = new ArrayList<>(people.subList(offsetNum, Math.min(20, (people.size() - offsetNum)) + offsetNum));
+                    ArrayList<Person> offsetPeople = selectPeople(conn, offsetNum);
+
+
+                    //ArrayList<Person> twentyPeople = new ArrayList<>(offsetPeople.subList(offsetNum, Math.min(20, (offsetPeople.size() - offsetNum)) + offsetNum));
                         //math.min for either 20 or remainder over 1000 if not equal to 20
                     HashMap m = new HashMap();
-                    m.put("people", twentyPeople);
+                    m.put("people", offsetPeople);
                     m.put("next", offsetNum + 20);
                     m.put("previous", offsetNum - 20);
                     boolean showPrevious = false;
-                    if (offsetNum >= 20) {
+                    if (offsetNum != 0) {
                         showPrevious = true;
                     }
                     m.put("showPrevious", showPrevious);
 
                     boolean showNext = false;
-                    if (offsetNum < people.size() - 20) {
+                    if (offsetNum < getSize(conn) - 20) {
                         showNext = true;
                     }
                     m.put("showNext", showNext);
@@ -129,9 +143,9 @@ public class People {
         Spark.get(
                 "/person",
                 ((request, response) -> {
-                    int id = Integer.valueOf(request.queryParams("id"));
+                    int idNum = Integer.valueOf(request.queryParams("id"));
                     HashMap m = new HashMap();
-                    Person person = people.get(id -1);
+                    Person person = selectPerson(conn, idNum);           //people.get(id -1);
                     m.put("person", person);
                     return new ModelAndView(m, "person.html");
 

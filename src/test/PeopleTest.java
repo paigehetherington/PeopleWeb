@@ -38,7 +38,7 @@ public class PeopleTest {
         Connection conn = startConnection();
         People.insertPerson(conn, "Paige", "H", "herbmama@gmail.com", "US", "4");
         People.insertPerson(conn, "Bob", "L", "so@gmail.com", "France", "5");
-        ArrayList<Person> persons = People.selectPeople(conn);
+        ArrayList<Person> persons = People.selectPeople(conn, 0);
         endConnection(conn);
         assertTrue(persons.size() == 2);
 
